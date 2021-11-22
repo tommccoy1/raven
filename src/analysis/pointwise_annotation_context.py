@@ -6,6 +6,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--generation_file", help="file of generations", type=str, default=None)
 parser.add_argument("--prompt_file", help="file of prompts", type=str, default=None)
 parser.add_argument("--to_score", help="what to compute copying from: 'prompt' for the prompt, 'previous_generation' for previously generated text, 'context' for the concatenation of prompt and previously generated text", type=str, default=None)
+parser.add_argument("--max_ngram", help="maximum n-gram size to consider (if omitted, it checks for all n-gram sizes)", type=int, default=None)
 args = parser.parse_args()
 
 
@@ -64,6 +65,14 @@ for index, prompt_and_generation in enumerate(prompts_plus_generations):
                 break
         if not scored:
             scores[end_index] = end_index+2
+
+    if args.max_ngram is not None:
+        truncated_scores = []
+
+        for score in scores:
+            truncated_scores.append(min(score, args.max_ngram+1))
+
+        scores = truncated_scores
 
 
     scored_prompts_and_generations.append((prompt_and_generation, (scores[:len(prompt)], scores[len(prompt):])))

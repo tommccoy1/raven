@@ -50,7 +50,8 @@ def perplexity_txl(file_to_score, prompt_file):
     total_perplexity = 0
     count_perplexities = 0
 
-    prompts = [x.strip() for x in open(prompt_file, "r").readlines()]
+    if prompt_file is not None:
+        prompts = [x.strip() for x in open(prompt_file, "r").readlines()]
 
     tokenizer = TransfoXLTokenizer.from_pretrained("transfo-xl-wt103")
     model = TransfoXLLMHeadModel.from_pretrained("transfo-xl-wt103").to(device)
@@ -66,7 +67,11 @@ def perplexity_txl(file_to_score, prompt_file):
 
     for index, line in enumerate(fi):
         # Encode the prompt
-        prompt = replace_newlines(prompts[index])
+        if prompt_file is None:
+            prompt = ""
+        else:
+            prompt = replace_newlines(prompts[index])
+
         prompt_tokens = tokenizer.encode(prompt)
         prompt_length = len(prompt_tokens)
 
@@ -123,7 +128,8 @@ def perplexity_gpt2(file_to_score, prompt_file):
     total_perplexity = 0
     count_perplexities = 0
 
-    prompts = [x.strip() for x in open(prompt_file, "r").readlines()]
+    if prompt_file is not None:
+        prompts = [x.strip() for x in open(prompt_file, "r").readlines()]
 
     tokenizer = GPT2Tokenizer.from_pretrained("gpt2-xl")
     model = GPT2LMHeadModel.from_pretrained("gpt2-xl").to(device)
@@ -133,7 +139,11 @@ def perplexity_gpt2(file_to_score, prompt_file):
     for index, line in enumerate(fi):
 
         # Encode the prompt
-        prompt = wikitext_detokenize(prompts[index])
+        if prompt_file is None:
+            prompt = wikitext_detokenize("")
+        else:
+            prompt = wikitext_detokenize(prompts[index])
+        
         prompt_tokens = tokenizer.encode(prompt)
         prompt_length = len(prompt_tokens)
 
@@ -226,35 +236,36 @@ def max_ngram_size_at_end(text=None, ngram_set=None):
 # gen_filename, train_filename, and prompt_filename are 
 # the names of the file of generations, the training set,
 # and the file of prompts
-# If gen_length is provided, only the first gen_length tokens
-# will be processed
 # max_ngram is the maximum ngram size to consider in the first pass;
 # the second pass will then fill in larger ngrams
 # If add_eos is a token instead of None, that token will be added at
 # the end of each line in the training file
-def get_ngram_overlaps(generation_filename=None, train_filename=None, prompt_filename=None, gen_length=None, max_ngram=10, add_eos=None):
+def get_ngram_overlaps(generation_filename=None, train_filename=None, prompt_filename=None, max_ngram=10, add_eos=None, first_pass_only=False):
 
-    prompt_file = open(prompt_filename, "r")
     generation_file = open(generation_filename, "r")
+    generations = generation_file.readlines()
+    generation_file.close()
+    
+    if prompt_filename is None:
+        prompts = ["" for generation in generations]
+    else:
+        prompt_file = open(prompt_filename, "r")
+        prompts = prompt_file.readlines()
+        prompt_file.close()
+       
     train_file = open(train_filename, "r")
     
-
     # Get a list of all prompts and generations concatenated together, and
     # a collection of all ngrams up to length max_ngram from these concatenated
     # prompts and generations
     prompts_plus_generations = []
     prompt_plus_generation_ngrams = {}
     
-    prompts = prompt_file.readlines()
-    generations = generation_file.readlines()
-
     for prompt, generation in zip(prompts, generations):
         prompt_plus_generation = prompt.strip().split() + generation.strip().split()
         prompts_plus_generations.append(prompt_plus_generation)
         update_dict_size_range(prompt_plus_generation, prompt_plus_generation_ngrams, max_n=max_ngram)
 
-    prompt_file.close()
-    generation_file.close()
 
 
     # The largest ngram at the end of the previous line that we must carry over
@@ -282,6 +293,8 @@ def get_ngram_overlaps(generation_filename=None, train_filename=None, prompt_fil
 
     logger.info("done with first pass over training set")
 
+    if first_pass_only:
+        return prompt_plus_generation_ngrams
 
     # The largest size of ngram overlap that we have
     # witnessed between the training set and the generations
