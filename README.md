@@ -383,31 +383,31 @@ source wikitext_continuations_syntax.sh
 
 Because GPT-2 was trained on data that is not publicly released, we are unable to provide the data used as inputs to our analyses, but we still provide the commands used to generate text from GPT-2 and to analyze that text.
 
-4. Generate text
+1. Generate text
 ```
 source generate_gpt2.sh
 ```
 
-5. Trim continuations and generations
+2. Trim continuations and generations
 ```
 source trim_gpt2.sh
 source trim_webtext_continuations.sh
 ```
 
-6. Convert BPE indices to words
+3. Convert BPE indices to words
 ```
 source all_gen_detokenization_redo.sh
 ```
 
 
-10. Tokenize
+4. Tokenize
 ```
 # Moses tokenizing GPT-2 generations
 source gpt2_gen_moses.sh
 
 ```
 
-11. Pointwise annotate
+5. Pointwise annotate
 ```
 # Training set
 source gpt2_pointwise_commands.sh
@@ -423,7 +423,7 @@ source webtext_continuations_pointwise_commands_training_and_context.sh
 
 ```
 
-12. N-gram analyses
+6. N-gram analyses
 ```
 # Training set
 source gpt2_ngram_analysis_training.sh
@@ -440,18 +440,18 @@ source webtext_continuations_ngram_analysis_context_and_training.sh
 
 
 
-13. Sentence tokenize
+7. Sentence tokenize
 ```
 gpt2_gen_sent_tokenize.sh
 ```
 
-14. Parse
+8. Parse
 ```
 gpt2_gen_parse.sh
 ```
 
 
-15. Run syntax analyses
+9. Run syntax analyses
 ```
 gpt2_syntax_commands.sh
 ```
@@ -466,7 +466,7 @@ This code is licensed under an [MIT license](https://github.com/tommccoy1/raven/
 
 If you make use of this code, please cite the following ([bibtex](https://tommccoy1.github.io/raven_bib.html)):
 
-R. Thomas McCoy, Paul Smolensky, Tal Linzen, Jianfeng Gao, and Asli Celikyilmaz.  2021. How much do language models copy from their training data? Evaluating linguistic novelty in text generation using RAVEN  *arXiv preprint arXiv 2111.09509*.
+R. Thomas McCoy, Paul Smolensky, Tal Linzen, Jianfeng Gao, and Asli Celikyilmaz.  2021. How much do language models copy from their training data? Evaluating linguistic novelty in text generation using RAVEN.  *arXiv preprint arXiv 2111.09509*.
 
 *Questions? Comments? Email [tom.mccoy@jhu.edu](mailto:tom.mccoy@jhu.edu).*
 
