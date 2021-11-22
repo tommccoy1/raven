@@ -1,6 +1,8 @@
 # RAVEN
 RAting VErbal Novelty
 
+This repo provides the code for our paper [How much do language models copy from their training data? Evaluating linguistic novelty in text generation using RAVEN](https://arxiv.org/pdf/2111.09509.pdf).
+
 
 # Quickstart
 
@@ -228,6 +230,8 @@ Here is a list of all the results that will be listed in the `.syntax_report` fi
 
 # Replicating our Wikitext-103 experiments
 
+This section goes over how to re-run our experiments with models trained on Wikitext-103 (i.e., the LSTM, Transformer, and Transformer-XL experiments reported in our paper). Note that some of these commands will take a very long time to run. In particular, we have grouped together related commands into .sh files, but in many cases it would take several weeks to run the entire .sh file, so you may instead wish to run the commands inside each file individually (none of the commands within an .sh file depend on each other, so they can be run in parellel).
+
 1. Download Wikitext-103 (in data/):
 ```
 wget https://s3.amazonaws.com/research.metamind.io/wikitext/wikitext-103-v1.zip
@@ -259,7 +263,7 @@ cp ../data/wikitext/vocab.txt ../data/wikitext-103/
 
 source generate_transformer.sh
 
-# LSTM
+# LSTM: Note that this uses the LSTM that we trained, which we have not yet released, but will update here when we have released it
 git clone https://github.com/facebookresearch/colorlessgreenRNNs.git
 cp generate_lstm.py colorlessgreenRNNs/src/language_models/
 cp lstm_lm.pt colorlessgreenRNNs/src/language_models/
@@ -325,12 +329,7 @@ source wikitext_continuations_ngram_analysis_context_and_training.sh
 ```
 
 
-
-
-
-
-
-5. Detokenize
+7. Detokenize
 ```
 python wikitext_detokenizer.py --file ../data/wikitext-103/wiki.valid.tokens
 python wikitext_detokenizer.py --file ../data/wikitext-103/wiki.test.tokens
@@ -353,7 +352,7 @@ source transformer_detokenize.sh
 python divide_by_linecount.py --file ../data/wikitext-103/wiki.train.tokens.detokenized --linecount 20000
 ```
 
-6. Sentence tokenize and parse
+8. Sentence tokenize and parse
 ```
 source wikitext_training_sent_tokenize.sh
 source wikitext_continuations_sentence_tokenize.sh
@@ -371,13 +370,115 @@ source txl_parse.sh
 
 ```
 
-7. Syntax analyses
+9. Syntax analyses
 ```
 source lstm_syntax.sh
 source transformer_syntax.sh
 source txl_syntax.sh
 source wikitext_continuations_syntax.sh
 ```
+
+
+# GPT-2 experiments
+
+Because GPT-2 was trained on data that is not publicly released, we are unable to provide the data used as inputs to our analyses, but we still provide the commands used to generate text from GPT-2 and to analyze that text.
+
+4. Generate text
+```
+source generate_gpt2.sh
+```
+
+5. Trim continuations and generations
+```
+source trim_gpt2.sh
+source trim_webtext_continuations.sh
+```
+
+6. Convert BPE indices to words
+```
+source all_gen_detokenization_redo.sh
+```
+
+
+10. Tokenize
+```
+# Moses tokenizing GPT-2 generations
+source gpt2_gen_moses.sh
+
+```
+
+11. Pointwise annotate
+```
+# Training set
+source gpt2_pointwise_commands.sh
+source webtext_continuations_pointwise_commands.sh
+
+# Context
+source gpt2_pointwise_commands_context.sh
+source webtext_continuations_pointwise_commands_context.sh
+
+# Training and context
+source gpt2_pointwise_commands_training_and_context.sh
+source webtext_continuations_pointwise_commands_training_and_context.sh
+
+```
+
+12. N-gram analyses
+```
+# Training set
+source gpt2_ngram_analysis_training.sh
+source webtext_continuations_ngram_analysis_training.sh
+
+# Context
+source gpt2_ngram_analysis_context.sh
+source webtext_continuations_ngram_analysis_context.sh
+
+# Training and context
+source gpt2_ngram_analysis_context_and_training.sh
+source webtext_continuations_ngram_analysis_context_and_training.sh
+```
+
+
+
+13. Sentence tokenize
+```
+gpt2_gen_sent_tokenize.sh
+```
+
+14. Parse
+```
+gpt2_gen_parse.sh
+```
+
+
+15. Run syntax analyses
+```
+gpt2_syntax_commands.sh
+```
+
+
+
+## License
+
+This code is licensed under an [MIT license](https://github.com/tommccoy1/raven/blob/main/LICENSE).
+
+## Citing
+
+If you make use of this code, please cite the following ([bibtex](https://tommccoy1.github.io/raven_bib.html)):
+
+R. Thomas McCoy, Paul Smolensky, Tal Linzen, Jianfeng Gao, and Asli Celikyilmaz.  2021. How much do language models copy from their training data? Evaluating linguistic novelty in text generation using RAVEN  *arXiv preprint arXiv 2111.09509*.
+
+*Questions? Comments? Email [tom.mccoy@jhu.edu](mailto:tom.mccoy@jhu.edu).*
+
+
+
+
+
+
+
+
+
+
 
 
 
