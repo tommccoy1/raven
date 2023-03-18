@@ -73,6 +73,12 @@ model = task.build_model(args)
 model.load_state_dict(torch.load(args.model_name_or_path, map_location=torch.device('cpu'))["model"])
 model.eval()
 
+def count_parameters(model):
+    for name, param in model.named_parameters():
+        print(name, param.numel())
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+
 # Set up tokenization dictionaries
 trg_dict = task.target_dictionary
 

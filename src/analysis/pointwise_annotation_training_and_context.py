@@ -48,7 +48,7 @@ for index, (training_annotated_line, context_annotated_line) in enumerate(zip(tr
     max_annotated.append(max_list)
     
 
-fo_scored = open(args.training_pointwise.replace(".training_pointwise", ".context_and_training_pointwise"), "w")
+fo_scored = open(args.training_pointwise.replace(".pointwise", ".context_and_training_pointwise"), "w")
 
 for max_scored in max_annotated:
     fo_scored.write(" ".join(max_scored) + "\n")

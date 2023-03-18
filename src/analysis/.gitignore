@@ -1,0 +1,7 @@
+data/
+*.scr
+*.log
+*.err
+*.sh
+*.pt
+src/colorlessgreenRNNs/

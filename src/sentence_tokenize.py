@@ -146,17 +146,10 @@ def sentences_trim(sentences):
 
 
 if args.generation:
-    if args.prompt_filename is not None:
-        fi_prompt = open(args.prompt_filename, "r")
-        prompts = fi_prompt.readlines()
+    fi_prompt = open(args.prompt_filename, "r")
 
-    for line_index, generation in enumerate(fi):
+    for line_index, (prompt, generation) in enumerate(zip(fi_prompt, fi)):
         print(line_index)
-
-        if args.prompt_filename is None:
-            prompt = ""
-        else:
-            prompt = prompts[line_index]
 
         # Whether the generation starts with a space
         generation_starts_with_space = (generation[0] == " ")

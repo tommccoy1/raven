@@ -118,6 +118,13 @@ with open(args.checkpoint, 'rb') as f:
         model = torch.load(f, map_location=lambda storage, loc: storage)
 
 
+def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+print(count_parameters(model))
+15/0
+
+
 fi_prompt = open(args.prompt_file, "r")
 fo = open("/".join(args.prompt_file.split("/")[:-1]) + "/lstm_" + args.prompt_file.split("/")[-1] + "_topk_" + str(args.topk) + "_topp_" + str(args.topp) + "_temp_" + str(args.temperature) + "_length_" + str(args.length) + ".generated", "w")
 for index, line in enumerate(fi_prompt):

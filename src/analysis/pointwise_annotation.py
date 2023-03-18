@@ -10,41 +10,39 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--generation_file", help="file of generations", type=str, default=None)
 parser.add_argument("--prompt_file", help="file of prompts", type=str, default=None)
 parser.add_argument("--training_file", help="training file to compare to", type=str, default=None)
-parser.add_argument("--max_ngram_first_pass", help="Maximum n-gram overlap size to start with (but the code will adaptively expand beyond this as needed)", type=int, default=10)
+parser.add_argument("--max_ngram", help="Maximum n-gram overlap size to start with (but the code will adaptively expand beyond this as needed)", type=int, default=10)
+parser.add_argument("--gen_length", help="Length of generated texts; if specified, this will truncate generations to that length", type=int, default=None)
+parser.add_argument("--n_gens", help="Number of generated texts", type=int, default=1000)
 parser.add_argument("--eos", help="EOS token to add at the end of every training line, if any", type=str, default=None)
-parser.add_argument("--first_pass_only", action="store_true", help="Only perform the first pass (i.e., checking for ngrams up to and including the size max_ngram_first_pass, but no larger)")
+parser.add_argument("--trimmed", action="store_true", help="whether using a trimmed prompt file")
 args = parser.parse_args()
 
 logging.basicConfig(format="%(asctime)s - %(levelname)s - %(name)s -   %(message)s", datefmt="%m/%d/%Y %H:%M:%S", level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-generation_ngrams = get_ngram_overlaps(generation_filename=args.generation_file, train_filename=args.training_file, prompt_filename=args.prompt_file, gen_length=args.gen_length, max_ngram=args.max_ngram_first_pass, add_eos=args.eos, first_pass_only=args.first_pass_only)
+generation_ngrams = get_ngram_overlaps(generation_filename=args.generation_file, train_filename=args.training_file, prompt_filename=args.prompt_file, gen_length=args.gen_length, max_ngram=args.max_ngram, add_eos=args.eos)
 
 
 
+
+prompt_file = open(args.prompt_file, "r")
 generation_file = open(args.generation_file, "r")
-generations = generation_file.readlines()
-generation_file.close()
-
-if args.prompt_file is None:
-    prompts = ["" for generation in generations]
-else:
-    prompt_file = open(args.prompt_file, "r")
-    prompts = prompt_file.readlines()
-    prompt_file.close()
-
 
 # Get a list of all prompts and generations concatenated together, and
 # a collection of all ngrams up to length max_ngram from these concatenated
 # prompts and generations
 prompts_plus_generations = []
 
+prompts = prompt_file.readlines()
+generations = generation_file.readlines()
 
 for prompt, generation in zip(prompts, generations):
     # Storing prompt and generation as a 2-tuple
     prompt_plus_generation = (prompt.strip().split(), generation.strip().split())
     prompts_plus_generations.append(prompt_plus_generation)
 
+prompt_file.close()
+generation_file.close()
 
 
 scored_prompts_and_generations = []
@@ -80,7 +78,10 @@ for position, prompt_and_generation in enumerate(prompts_plus_generations):
 
     scored_prompts_and_generations.append(((prompt, prompt_scores), (generation, generation_scores)))
 
-fo_scored = open(args.generation_file + ".training_pointwise", "w")
+if args.trimmed:
+    fo_scored = open(args.generation_file + ".pointwise_trimmed", "w")
+else:
+    fo_scored = open(args.generation_file + ".pointwise", "w")
 
 
 for index, scored_prompt_and_generation in enumerate(scored_prompts_and_generations):

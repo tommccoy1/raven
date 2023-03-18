@@ -1,0 +1,9 @@
+data/
+*.scr
+*.log
+*.err
+*.sh
+*.pt
+src/colorlessgreenRNNs/
+src/.venv/
+src/.venv2/

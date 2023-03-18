@@ -45,7 +45,8 @@ logging.basicConfig(format="%(asctime)s - %(levelname)s - %(name)s -   %(message
 logger = logging.getLogger(__name__)
 
 const_parser = spacy.load('en_core_web_md')
-benepar.download('benepar_en3', download_dir='.venv/nltk_data')
+benepar.download('benepar_en3', download_dir='/home-4/rmccoy20@jhu.edu/scratch/parsing/nlg-novelty-final/src_new_parse')
+nltk.data.path.append('/home-4/rmccoy20@jhu.edu/scratch/parsing/nlg-novelty-final/src_new_parse')
 
 if spacy.__version__.startswith('2'):
     const_parser.add_pipe(benepar.BeneparComponent("benepar_en3"))

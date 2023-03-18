@@ -178,82 +178,16 @@ def abstract_parse_from_parse(parse):
 
     return new_parse
 
-def path_from_arc_dict(arc_dict, index):
-
-    parts = arc_dict[index]
-    rel = parts[0]
-    word1 = parts[1]
-    ind1 = parts[2]
-    word2 = parts[3]
-    ind2 = parts[4]
-
-    if rel == "root" or ind2 == "0":
-        return [word1, rel, "ROOT"]
-    else:
-        return [word1, rel] + path_from_arc_dict(arc_dict, ind2)
-
-def arc_dict_to_paths(arc_dict):
-    all_paths = []
-    for key in arc_dict:
-        path = path_from_arc_dict(arc_dict, key)
-
-        for index in range(len(path)+1):
-            if index % 2 == 1:
-                sub_path = path[:index]
-
-                # We cap the path length at 10
-                if len(sub_path) <= 19:
-                    all_paths.append(tuple(sub_path))
-        
-    return all_paths
-
-def unlabeled_path_from_arc_dict(arc_dict, index):
-
-    parts = arc_dict[index]
-    rel = parts[0]
-    word1 = parts[1]
-    ind1 = parts[2]
-    word2 = parts[3]
-    ind2 = parts[4]
-
-    if word1 == "ROOT":
-        return [word1]
-    elif word2 == "ROOT" or ind2 == "0":
-        return [word1, "ROOT"]
-    else:
-        return [word1] + unlabeled_path_from_arc_dict(arc_dict, ind2)
-
-def arc_dict_to_unlabeled_paths(arc_dict):
-    all_paths = []
-    for key in arc_dict:
-        path = unlabeled_path_from_arc_dict(arc_dict, key)
-
-        for index in range(1,len(path)+1):
-            sub_path = path[:index]
-
-            # We cap the path length at 10
-            if len(path) <= 10:
-                all_paths.append(tuple(sub_path))
-
-    return all_paths
-
-
 def dep_arcs_from_dep(arc_list):
     triples = []
     rels = []
     unlabeled_arcs = []
 
-    index2info = {}
-
     for arc in arc_list:
         parts = arc.split(",")
         rel = parts[0]
         word1 = parts[1]
-        ind1 = parts[2]
         word2 = parts[3]
-        ind2 = parts[4]
-
-        index2info[ind1] = parts
 
         triples.append((rel, word1, word2))
         unlabeled_arcs.append((word1, word2))
@@ -264,10 +198,7 @@ def dep_arcs_from_dep(arc_list):
         rels.append(rel1)
         rels.append(rel2)
 
-    dep_paths = arc_dict_to_paths(index2info)
-    unlabeled_dep_paths = arc_dict_to_unlabeled_paths(index2info)
-
-    return triples, rels, unlabeled_arcs, dep_paths, unlabeled_dep_paths
+    return triples, rels, unlabeled_arcs
 
 def dep_arg_structure_from_dep(arc_list):
 
@@ -333,8 +264,6 @@ def gen_condensed_to_dicts(gen_condensed_filename):
     parse_dict = {}
     pos_seq_dict = {}
     dep_arc_dict = {}
-    dep_path_dict = {}
-    dep_unlabeled_path_dict = {}
     dep_rel_dict = {}
     dep_unlabeled_dict = {}
     dep_arg_structure_dict = {}
@@ -390,7 +319,7 @@ def gen_condensed_to_dicts(gen_condensed_filename):
 
         for dep_parse in dep.split("&"):
             dep_parse = dep_parse.split()
-            dep_triples, dep_rels, dep_unlabeleds, dep_paths, dep_unlabeled_paths = dep_arcs_from_dep(dep_parse)
+            dep_triples, dep_rels, dep_unlabeleds = dep_arcs_from_dep(dep_parse)
             dep_arg_structures = dep_arg_structure_from_dep(dep_parse)
 
        
@@ -405,16 +334,6 @@ def gen_condensed_to_dicts(gen_condensed_filename):
                 _, w1, w2 = dep_triple
                 word_seen_in_dep[w1] = False
                 word_seen_in_dep[w2] = False
-
-            for dep_path in dep_paths:
-                if dep_path not in dep_path_dict:
-                    dep_path_dict[dep_path] = [[], False]
-                dep_path_dict[dep_path][0].append(position)
-
-            for dep_path in dep_unlabeled_paths:
-                if dep_path not in dep_unlabeled_path_dict:
-                    dep_unlabeled_path_dict[dep_path] = [[], False]
-                dep_unlabeled_path_dict[dep_path][0].append(position)
 
             for (word, rel) in dep_rels:
                 if word not in dep_rel_dict:
@@ -431,6 +350,7 @@ def gen_condensed_to_dicts(gen_condensed_filename):
                 if dep_unlabeled not in dep_unlabeled_dict:
                     dep_unlabeled_dict[dep_unlabeled] = [[], False]
                 dep_unlabeled_dict[dep_unlabeled][0].append(position)
+
 
             for (verb, arg_structure) in dep_arg_structures:
                 if verb not in dep_arg_structure_dict:
@@ -452,8 +372,6 @@ def gen_condensed_to_dicts(gen_condensed_filename):
     all_info_dict["parses"] = parse_dict
     all_info_dict["pos_seqs"] = pos_seq_dict
     all_info_dict["dep_arcs"] = dep_arc_dict
-    all_info_dict["dep_paths"] = dep_path_dict
-    all_info_dict["dep_unlabeled_paths"] = dep_unlabeled_path_dict
     all_info_dict["dep_rels"] = dep_rel_dict
     all_info_dict["dep_unlabeled"] = dep_unlabeled_dict
     all_info_dict["dep_arg_structures"] = dep_arg_structure_dict
@@ -499,7 +417,7 @@ def update_all_info_dict_training(all_info_dict, training_filename):
 
         for dep_parse in dep.split("&"):
             dep_parse = dep_parse.split()
-            dep_triples, dep_rels, dep_unlabeleds, dep_paths, dep_unlabeled_paths = dep_arcs_from_dep(dep_parse)
+            dep_triples, dep_rels, dep_unlabeleds = dep_arcs_from_dep(dep_parse)
             dep_arg_structures = dep_arg_structure_from_dep(dep_parse)
 
             for dep_triple in dep_triples:
@@ -514,14 +432,6 @@ def update_all_info_dict_training(all_info_dict, training_filename):
                 # Keeping track of which determiners each word has appeared with
                 if dep_triple[0] == "det" and dep_triple[2] in all_info_dict["word2det_seen"]:
                     all_info_dict["word2det_seen"][dep_triple[2]][dep_triple[1].lower()] = 1
-
-            for dep_path in dep_paths:
-                if dep_path in all_info_dict["dep_paths"]:
-                    all_info_dict["dep_paths"][dep_path][1] = True
-
-            for dep_path in dep_unlabeled_paths:
-                if dep_path in all_info_dict["dep_unlabeled_paths"]:
-                    all_info_dict["dep_unlabeled_paths"][dep_path][1] = True
 
             for (word, rel) in dep_rels:
                 if word in all_info_dict["dep_rels"]:
@@ -736,48 +646,6 @@ def analyze_dep_arcs(all_info_dict):
 
     return count_novel_dep_arcs, count_dep_arcs, novel_dep_arcs[:200], a_to_the, the_to_a, novel_subj, novel_obj
 
-def analyze_dep_paths(all_info_dict):
-
-    count_novel_dep_paths = {}
-    count_dep_paths = {}
-
-    for i in range(1,11):
-        count_novel_dep_paths[i] = 0
-        count_dep_paths[i] = 0
-
-    for dep_path in all_info_dict["dep_paths"]:
-        length = (len(dep_path)+1)//2
-        count_dep_paths[length] += count_generation_appearances(all_info_dict["dep_paths"][dep_path][0])
-
-        if not all_info_dict["dep_paths"][dep_path][1]:
-            count_first_from_gens, first_appearance_list = count_first_appearances_in_generations(all_info_dict["dep_paths"][dep_path][0])
-
-            count_novel_dep_paths[length] += count_first_from_gens
-
-    return count_novel_dep_paths, count_dep_paths
-
-
-def analyze_dep_unlabeled_paths(all_info_dict):
-
-    count_novel_dep_paths = {}
-    count_dep_paths = {}
-
-    for i in range(1,11):
-        count_novel_dep_paths[i] = 0
-        count_dep_paths[i] = 0
-
-    for dep_path in all_info_dict["dep_unlabeled_paths"]:
-        length = len(dep_path)
-        count_dep_paths[length] += count_generation_appearances(all_info_dict["dep_unlabeled_paths"][dep_path][0])
-
-        if not all_info_dict["dep_unlabeled_paths"][dep_path][1]:
-            count_first_from_gens, first_appearance_list = count_first_appearances_in_generations(all_info_dict["dep_unlabeled_paths"][dep_path][0])
-
-            count_novel_dep_paths[length] += count_first_from_gens
-
-    return count_novel_dep_paths, count_dep_paths
-
-
 
 def analyze_dep_rels(all_info_dict):
     novel_dep_rels = []
@@ -896,6 +764,7 @@ def analyze_dep_arg_structure(all_info_dict):
 if False:
     fi = open("../../data/prompts_and_generations/gpt2-xl_webtext_prompts_length141_1of1_k40_p1_temp1.0_beam1_len1300_batchsize5.generated.trimmed.word.sentences.parsed", "r")
 
+if False:
     for line in fi:
         parts = line.split("\t")
         parses = parts[1].split("&")
@@ -915,16 +784,13 @@ if False:
 
         deps = parts[2].split("&")
         for dep in deps:
-            #dep_arcs = dep_arcs_from_dep(dep.split())
-            triples, rels, unlabeled_arcs, dep_paths, dep_unlabeled_paths = dep_arcs_from_dep(dep.split())
+            dep_arcs = dep_arcs_from_dep(dep.split())
 
             #dep_arg_structures = dep_arg_structure_from_dep(dep.split())
             print(parts[0])
             print(dep)
             #print(dep_arg_structures)
-            #print(dep_arcs)
-            for path in dep_unlabeled_paths:
-                print("_".join(path))
+            print(dep_arcs)
             print("")
 
 

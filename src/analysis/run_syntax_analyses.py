@@ -13,6 +13,7 @@ args = parser.parse_args()
 logging.basicConfig(format="%(asctime)s - %(levelname)s - %(name)s -   %(message)s", datefmt="%m/%d/%Y %H:%M:%S", level=logging.INFO)
 logging.info(args)
 
+# CHANGE BACK
 report_file = open(args.generation + ".syntax_report", "w")
 
 logging.info("starting")
@@ -36,10 +37,16 @@ count_novel_pos_seqs, count_pos_seqs, novel_pos_seqs = analyze_pos_seqs(all_info
 logging.info("counting dependency arcs")
 count_novel_dep_arcs, count_dep_arcs, novel_dep_arcs, a_to_the, the_to_a, novel_subj, novel_obj = analyze_dep_arcs(all_info_dict)
 
+logging.info("counting dependency paths")
+count_novel_dep_paths, count_dep_paths = analyze_dep_paths(all_info_dict)
+
+logging.info("counting unlabeled dependency paths")
+count_novel_dep_unlabeled_paths, count_dep_unlabeled_paths = analyze_dep_unlabeled_paths(all_info_dict)
+
 logging.info("counting unlabeled dependency arcs")
 count_novel_dep_arcs_unlabeled, count_dep_arcs_unlabeled, novel_dep_arcs_unlabeled = analyze_dep_unlabeled(all_info_dict)
 
-logging.info("counting dependency roles")
+logging.info("counting dependency relations")
 count_novel_dep_rels, count_dep_rels, novel_dep_rels, nsubj_to_obj, obj_to_nsubj, active_to_passive, passive_to_active = analyze_dep_rels(all_info_dict)
 
 logging.info("counting dependency argument structures")
@@ -139,25 +146,44 @@ for example in novel_dep_arcs_unlabeled:
     report_file.write(" ".join(example[0]) + "\t" + all_info_dict["indices_to_info"][example[1]]["sentence"] + "\t" + " ".join(all_info_dict["indices_to_info"][example[1]]["dep"]) + "\n")
 report_file.write("\n\n")
 
+report_file.write("Novel dependency paths:\n")
+for length in range(1,11):
+    if count_dep_paths[length] == 0:
+        ratio = 0
+    else:
+        ratio = count_novel_dep_paths[length]*1.0/count_dep_paths[length]
+    report_file.write("Length " + str(length) + ":\t" + str(ratio) + "\t" + str(count_novel_dep_paths[length]) + "\t" + str(count_dep_paths[length]) + "\n")
+report_file.write("\n\n")
+
+report_file.write("Novel unlabeled dependency paths:\n")
+for length in range(1,11):
+    if count_dep_unlabeled_paths[length] == 0:
+        ratio = 0
+    else:
+        ratio = count_novel_dep_unlabeled_paths[length]*1.0/count_dep_unlabeled_paths[length]
+    report_file.write("Length " + str(length) + ":\t" + str(ratio) + "\t" + str(count_novel_dep_unlabeled_paths[length]) + "\t" + str(count_dep_unlabeled_paths[length]) + "\n")
+report_file.write("\n\n")
+
+
 if count_dep_rels == 0:
     ratio = 0
 else:
     ratio = count_novel_dep_rels*1.0/count_dep_rels
 
-report_file.write("Novel dependency roles:\t" + str(ratio) + "\t" + str(count_novel_dep_rels) + "\t" + str(count_dep_rels) + "\n\n")
-report_file.write("Examples of novel dependency roles:\n")
+report_file.write("Novel dependency relations:\t" + str(ratio) + "\t" + str(count_novel_dep_rels) + "\t" + str(count_dep_rels) + "\n\n")
+report_file.write("Examples of novel dependency relations:\n")
 for example in novel_dep_rels:
     report_file.write(" ".join(example[0]) + "\t" + all_info_dict["indices_to_info"][example[1]]["sentence"] + "\t" + " ".join(all_info_dict["indices_to_info"][example[1]]["dep"]) + "\n")
-report_file.write("\nExamples of novel dependency roles - nsubj to obj:\n")
+report_file.write("\nExamples of novel dependency relations - nsubj to obj:\n")
 for example in nsubj_to_obj:
     report_file.write(" ".join(example[0]) + "\t" + all_info_dict["indices_to_info"][example[1]]["sentence"] + "\t" + " ".join(all_info_dict["indices_to_info"][example[1]]["dep"]) + "\n")
-report_file.write("\nExamples of novel dependency roles - obj to nsubj:\n")
+report_file.write("\nExamples of novel dependency relations - obj to nsubj:\n")
 for example in obj_to_nsubj:
     report_file.write(" ".join(example[0]) + "\t" + all_info_dict["indices_to_info"][example[1]]["sentence"] + "\t" + " ".join( all_info_dict["indices_to_info"][example[1]]["dep"]) + "\n")
-report_file.write("\nExamples of novel dependency roles - active to passive:\n")
+report_file.write("\nExamples of novel dependency relations - active to passive:\n")
 for example in active_to_passive:
     report_file.write(" ".join(example[0]) + "\t" + all_info_dict["indices_to_info"][example[1]]["sentence"] + "\t" + " ".join(all_info_dict["indices_to_info"][example[1]]["dep"]) + "\n")
-report_file.write("\nExamples of novel dependency roles - passive to active:\n")
+report_file.write("\nExamples of novel dependency relations - passive to active:\n")
 for example in passive_to_active:
     report_file.write(" ".join(example[0]) + "\t" + all_info_dict["indices_to_info"][example[1]]["sentence"] + "\t" + " ".join(all_info_dict["indices_to_info"][example[1]]["dep"]) + "\n")
 report_file.write("\n\n")
