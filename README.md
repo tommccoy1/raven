@@ -10,6 +10,8 @@ This repo provides the code for our paper [How much do language models copy from
 
 1. We have provided some example generated text for which we want to evaluate the novelty: this is in `data/prompts_and_generations/example_prompts.txt` and `data/prompts_and_generations/example_generations.txt`. We will be evaluating its novelty relative to the mini training set in `data/miniwiki/wiki.train.tokens`. The first step is to annotate each word with its pointwise duplication score:
 ```
+# If not there already, navigate to the directory src/analysis/
+
 python pointwise_annotation_training.py --generation_file ../../data/prompts_and_generations/example_generations.txt --prompt_file ../../data/prompts_and_generations/example_prompts.txt --training_file ../../data/miniwiki/wiki.train.tokens --max_ngram_first_pass 10 --eos \<eos\>
 python pointwise_annotation_context.py --generation_file ../../data/prompts_and_generations/example_generations.txt --prompt_file ../../data/prompts_and_generations/example_prompts.txt --to_score context
 python pointwise_annotation_training_and_context.py --training_pointwise ../../data/prompts_and_generations/example_generations.txt.training_pointwise --context_pointwise ../../data/prompts_and_generations/example_generations.txt.context_pointwise
@@ -17,11 +19,15 @@ python pointwise_annotation_training_and_context.py --training_pointwise ../../d
 
 2. Now, using the annotated files above, generate a report describing the level of n-gram novelty. The resulting n-gram novelty report will be found in `../../data/prompts_and_generations/example_generations.txt.context_and_training_pointwise.ngram_report`.
 ```
+# If not there already, navigate to the directory src/analysis/
+
 python ngram_overlap_from_pointwise.py --pointwise_file ../../data/prompts_and_generations/example_generations.txt.context_and_training_pointwise --generation_file ../../data/prompts_and_generations/example_generations.txt --fast_analyses
 ```
 
 3. In order to perform our syntactic novelty analyses, we need to parse our training set and our generated text. The parsers that we use take raw text (not tokenized), whereas our training set and generated text are tokenized. Therefore, we first need to detokenize the text (if you are using a different dataset that is not tokenized, this step might not be necessary):
 ```
+# If not there already, navigate to the directory src/
+
 python wikitext_detokenizer.py --file ../data/miniwiki/wiki.train.tokens
 python wikitext_detokenizer.py --file ../data/prompts_and_generations/example_generations.txt
 python wikitext_detokenizer.py --file ../data/prompts_and_generations/example_prompts.txt
@@ -29,6 +35,8 @@ python wikitext_detokenizer.py --file ../data/prompts_and_generations/example_pr
 
 4. Next we sentence tokenize and parse our training set and our generated text, giving both constituency and dependency parses. (On the mini files listed here, these two parsing commands will each take about 3 minutes).
 ```
+# If not there already, navigate to the directory src/
+
 python sentence_tokenize.py --filename ../data/miniwiki/wiki.train.tokens.detokenized --max_subword_count 400 --unk \<unk\>
 python sentence_tokenize.py --filename ../data/prompts_and_generations/example_generations.txt.detokenized --max_subword_count 400 --generation --prompt_filename ../data/prompts_and_generations/example_prompts.txt.detokenized --newline \<eos\> --unk \<unk\> --space_before_generation
 
@@ -38,6 +46,8 @@ python parse.py --file_to_parse ../data/prompts_and_generations/example_generati
 
 5. Finally we use these parses to analyze the syntactic novelty of the generated text. The resulting syntactic novelty report will be found in `../../data/prompts_and_generations/example_generations.txt.detokenized.sentences.parsed.syntax_report`
 ```
+# If not there already, navigate to the directory src/analysis/
+
 python run_syntax_analyses.py --training ../../data/miniwiki/wiki.train.tokens.detokenized.sentences.parsed --generation ../../data/prompts_and_generations/example_generations.txt.detokenized.sentences.parsed --all_analyses
 ```
 
