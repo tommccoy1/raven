@@ -87,6 +87,9 @@ pip install -U supar
 pip install benepar
 python -m spacy download en_core_web_md
 
+# We used version 0.1.1
+pip install sacremoses
+
 ```
 
 # Analyzing n-gram novelty for your own data
