@@ -45,8 +45,14 @@ logging.basicConfig(format="%(asctime)s - %(levelname)s - %(name)s -   %(message
 logger = logging.getLogger(__name__)
 
 const_parser = spacy.load('en_core_web_md')
-benepar.download('benepar_en3', download_dir='/home-4/rmccoy20@jhu.edu/scratch/parsing/nlg-novelty-final/src_new_parse')
-nltk.data.path.append('/home-4/rmccoy20@jhu.edu/scratch/parsing/nlg-novelty-final/src_new_parse')
+
+# If the default benepar directory doesn't work for you, 
+# you can specify a specific directory by removing the 
+# line "benepar.download('benepar_en3')" and replacing 
+# it with the two commented-out lines below
+# benepar.download('benepar_en3', download_dir='PATH_TO_DIRECTORY') 
+# nltk.data.path.append('PATH_TO_DIRECTORY')
+benepar.download('benepar_en3') 
 
 if spacy.__version__.startswith('2'):
     const_parser.add_pipe(benepar.BeneparComponent("benepar_en3"))
