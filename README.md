@@ -26,7 +26,8 @@ python ngram_overlap_from_pointwise.py --pointwise_file ../../data/prompts_and_g
 
 3. In order to perform our syntactic novelty analyses, we need to parse our training set and our generated text. The parsers that we use take raw text (not tokenized), whereas our training set and generated text are tokenized. Therefore, we first need to detokenize the text (if you are using a different dataset that is not tokenized, this step might not be necessary):
 ```
-# If not there already, navigate to the directory src/
+# If not there already, navigate to the directory src/ (you will likely
+# need to do "cd ..")
 
 python wikitext_detokenizer.py --file ../data/miniwiki/wiki.train.tokens
 python wikitext_detokenizer.py --file ../data/prompts_and_generations/example_generations.txt
@@ -46,7 +47,8 @@ python parse.py --file_to_parse ../data/prompts_and_generations/example_generati
 
 5. Finally we use these parses to analyze the syntactic novelty of the generated text. The resulting syntactic novelty report will be found in `../../data/prompts_and_generations/example_generations.txt.detokenized.sentences.parsed.syntax_report`
 ```
-# If not there already, navigate to the directory src/analysis/
+# If not there already, navigate to the directory src/analysis/ (you
+# will likely need to do "cd analysis/")
 
 python run_syntax_analyses.py --training ../../data/miniwiki/wiki.train.tokens.detokenized.sentences.parsed --generation ../../data/prompts_and_generations/example_generations.txt.detokenized.sentences.parsed --all_analyses
 ```
